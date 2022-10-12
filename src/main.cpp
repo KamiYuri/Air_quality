@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "DHT.h"
 #include "Adafruit_Sensor.h"
+#include "LiquidCrystal_I2C.h"
+
 
 #define redLed 12
 #define greenLed 11
@@ -12,6 +14,7 @@
 String quality =""; 
 
 DHT dht(DHTPIN, DHTTYPE);
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 typedef struct dataStruct {
   float temp;
@@ -27,8 +30,25 @@ void setup() {
   pinMode(redLed, OUTPUT);
   pinMode(greenLed, OUTPUT);
   dht.begin();
+
+  lcd.init();
+  lcd.backlight();
+
   Serial.begin(9600);
 }
+
+void printLCD (float temp, float hud, int gasL) {
+  lcd.setCursor(0,0);
+  lcd.print("T:");
+  lcd.print(temp);
+  lcd.print("H:");
+  lcd.print(hud);
+  
+  lcd.setCursor(0, 1);
+  lcd.print("Gas:");
+  lcd.print(gasL);
+}
+
 
 void printData(dataStruct data) {
   Serial.print("Temperature: ");
@@ -41,6 +61,8 @@ void printData(dataStruct data) {
   Serial.print(data.gasLevel);
   Serial.print(" - ");
   Serial.println(quality);
+
+  printLCD(data.temp, data.hud, data.gasLevel);
 }
 
 void loop() {
